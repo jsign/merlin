@@ -37,17 +37,56 @@ func New(protocolLabel []byte) *Strobe128 {
 		curFlags: 0,
 	}
 
-	strobe.MetaAD(protocolLabel)
+	strobe.MetaAD(protocolLabel, false)
 
 	return strobe
 }
 
-func (s *Strobe128) MetaAD(data []byte) {
-	s.beginOp(flagM | flagA)
+func (s *Strobe128) MetaAD(data []byte, more bool) {
+	s.beginOp(flagM|flagA, more)
 	s.absorb(data)
 }
 
-func (s *Strobe128) beginOp(flags byte) {
+func (s *Strobe128) AD(data []byte, more bool) {
+	s.beginOp(flagA, more)
+	s.absorb(data)
+}
+
+func (s *Strobe128) PRF(data []byte, more bool) {
+	s.beginOp(flagI|flagA|flagC, more)
+	s.squeeze(data)
+}
+
+func (s *Strobe128) key(data []byte, more bool) {
+	s.beginOp(flagA|flagC, more)
+	s.overwrite(data)
+}
+
+func (s *Strobe128) squeeze(data []byte) {
+	for i := range data {
+		data[i] = s.state[s.pos]
+		s.state[s.pos] = 0
+		s.pos += 1
+		if s.pos == strobeR {
+			s.runF()
+		}
+	}
+}
+
+func (s *Strobe128) overwrite(data []byte) {
+	for i := range data {
+		s.state[s.pos] = data[i]
+		s.pos += 1
+		if s.pos == strobeR {
+			s.runF()
+		}
+	}
+}
+
+func (s *Strobe128) beginOp(flags byte, more bool) {
+	if more {
+		return
+	}
 	oldBegin := s.posBegin
 	s.posBegin = s.pos + 1
 	s.curFlags = flags
@@ -80,6 +119,11 @@ func (s *Strobe128) runF() {
 }
 
 func unsafeKeccakF1600(state *AlignedKeccakState) {
+	// This is a tension point between a clean port from Rust and leveraging
+	// Go stdlib keccackF1600 implementation. The former express the state as []byte,
+	// while the latter as [25]uint64.
+	// I'm not a fan of unsafe nor copying 200 bytes to 25 uint64s in hotpaths.
+	// You can see who won here :)
 	data := (*[25]uint64)(unsafe.Pointer(state))
 	keccakF1600(data, 24)
 }
