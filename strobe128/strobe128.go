@@ -24,13 +24,13 @@ type Strobe128 struct {
 	curFlags byte
 }
 
-func New(protocolLabel []byte) *Strobe128 {
+func New(protocolLabel []byte) Strobe128 {
 	var st AlignedKeccakState
 	copy(st[:6], []byte{1, strobeR + 2, 1, 0, 1, 96})
 	copy(st[6:], string("STROBEv1.0.2"))
 	unsafeKeccakF1600(&st)
 
-	strobe := &Strobe128{
+	strobe := Strobe128{
 		state:    st,
 		pos:      0,
 		posBegin: 0,
