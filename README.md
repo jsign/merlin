@@ -16,6 +16,10 @@ The goal is to provide a Go implementation of the Merlin protocol that is compat
 
 The implementation tries to be close to the original Rust one, with some minor changes to make it more idiomatic and performant in Go.
 
+## Current status
+
+This repository is currently a work in progress. The code isn't audited nor ready for production use.
+
 
 ## About
 Merlin is authored by Henry de Valence, with design input from Isis
