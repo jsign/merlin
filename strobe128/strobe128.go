@@ -57,7 +57,7 @@ func (s *Strobe128) PRF(data []byte, more bool) {
 	s.squeeze(data)
 }
 
-func (s *Strobe128) key(data []byte, more bool) {
+func (s *Strobe128) Key(data []byte, more bool) {
 	s.beginOp(flagA|flagC, more)
 	s.overwrite(data)
 }

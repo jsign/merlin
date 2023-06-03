@@ -29,7 +29,7 @@ func TestConformance(t *testing.T) {
 	require.Equal(t, exp, got)
 
 	s1.MetaAD([]byte("key"), false)
-	s1.key(prf1, false)
+	s1.Key(prf1, false)
 
 	prf1 = make([]byte, 32)
 	s1.MetaAD([]byte("prf"), false)
