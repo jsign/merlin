@@ -15,17 +15,17 @@ const (
 	flagK = 1 << 5
 )
 
-type AlignedKeccakState [200]byte
+type alignedKeccakState [200]byte
 
 type Strobe128 struct {
-	state    AlignedKeccakState
+	state    alignedKeccakState
 	pos      byte
 	posBegin byte
 	curFlags byte
 }
 
 func New(protocolLabel []byte) Strobe128 {
-	var st AlignedKeccakState
+	var st alignedKeccakState
 	copy(st[:6], []byte{1, strobeR + 2, 1, 0, 1, 96})
 	copy(st[6:], string("STROBEv1.0.2"))
 	unsafeKeccakF1600(&st)
@@ -118,7 +118,7 @@ func (s *Strobe128) runF() {
 	s.posBegin = 0
 }
 
-func unsafeKeccakF1600(state *AlignedKeccakState) {
+func unsafeKeccakF1600(state *alignedKeccakState) {
 	// This is a tension point between a clean port from Rust and leveraging
 	// Go stdlib keccackF1600 implementation. The former express the state as []byte,
 	// while the latter as [25]uint64.
